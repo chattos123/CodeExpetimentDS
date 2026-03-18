@@ -1,123 +1,57 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using Soumyajit.System.DS.LanguageDS.Data;
-//using Soumyajit.System.DS.LanguageDS.Interface.Data;
+﻿    using Soumyajit.System.DS.LanguageDS.Data;
+    using Soumyajit.System.DS.LanguageDS.Interface.Serialize;
 
-//namespace Soumyajit.System.DS.LanguageDS.Dictionary
-//{
-//    public class GermanDictionary : ILanguageDictionary<GermanWordEntry>
-//    {
-//        private readonly Dictionary<string, GermanWordEntry> _storage = new(StringComparer.OrdinalIgnoreCase);
-
-//        // Implementation of interface methods...
-//        public void AddWord(string word) => AddWord(word, Gender.Neuter, word); // Default
-
-//        // Overloaded method specific to German
-//        public void AddWord(string word, Gender gender, string plural)
-//        {
-//            if (!_storage.ContainsKey(word))
-//                _storage.Add(word, new GermanWordEntry(word, gender, plural));
-//        }
-
-//        public GermanWordEntry SearchWord(string word)
-//        {
-//            GermanWordEntry? entry = null;
-//            bool bSuccess = _storage.TryGetValue(word, out entry);
-
-//            if (bSuccess)
-//            {
-//                if (entry != null)
-//                {
-//                    return entry;
-//                }
-//                else
-//                {
-//                    throw new Exception();
-//                }
-//            }
-//            else
-//            {
-//                throw new Exception();
-//            }
-//            //return _storage.TryGetValue(word, out var entry) ? entry : null;
-//        }
-
-//        // Interface requires these, even if logic is similar to English
-//        public bool DeleteWord(string word)
-//        {
-//            if (!_storage.TryGetValue(word, out var entry)) return false;
-
-//            foreach (var syn in entry.Synonyms)
-//                if (_storage.ContainsKey(syn)) _storage[syn].Synonyms.Remove(word);
-
-//            foreach (var ant in entry.Antonyms)
-//                if (_storage.ContainsKey(ant)) _storage[ant].Antonyms.Remove(word);
-
-//            return _storage.Remove(word);
-//        }
-
-//        public void AddSynonym(string word1, string word2) 
-//        { /* Logic similar to English */
-//            AddWord(word1);
-//            AddWord(word2);
-//            _storage[word1].Synonyms.Add(word2);
-//            _storage[word2].Synonyms.Add(word1);
-//        }
-//        public void AddAntonym(string word1, string word2)
-//        {
-//            AddWord(word1);
-//            AddWord(word2);
-//            _storage[word1].Antonyms.Add(word2);
-//            _storage[word2].Antonyms.Add(word1);
-//        }
-
-//        public bool GetSynonym(string word, out IEnumerable<string>? synonyms)
-//        {
-//            if (_storage.TryGetValue(word, out var entry) && entry.Synonyms.Count > 0)
-//            {
-//                synonyms = entry.Synonyms;
-//                return true;
-//            }
-
-//            synonyms = null;
-//            return false;
-//        }
-
-//        public bool GetAntonym(string word, out IEnumerable<string>? antonyms)
-//        {
-//            if (_storage.TryGetValue(word, out var entry) && entry.Antonyms.Count > 0)
-//            {
-//                antonyms = entry.Antonyms;
-//                return true;
-//            }
-
-//            antonyms = null;
-//            return false;
-//        }
-//    }
-//}
-
-using Soumyajit.System.DS.LanguageDS.Data;
-using Soumyajit.System.DS.LanguageDS.Interface.Serialize;
-
-namespace Soumyajit.System.DS.LanguageDS.Dictionary
-{
-    public class GermanDictionary : LanguageDictionaryBase<GermanWordEntry>
+    namespace Soumyajit.System.DS.LanguageDS.Dictionary
     {
-        public GermanDictionary(IDictionaryStorage<GermanWordEntry>? storageService = null) : base(storageService)
+        /// <summary>
+        /// A dictionary implementation for German words.
+        /// Manages German-specific metadata (gender and plural form) via <see cref="GermanWordEntry"/>.
+        /// Inherits core dictionary behavior from <see cref="LanguageDictionaryBase{TEntry}"/>.
+        /// </summary>
+        /// <remarks>
+        /// This class provides a language-specific overload for adding words that includes
+        /// grammatical gender and plural form, while also implementing the parameterless
+        /// AddWord(string) from <see cref="ILanguageDictionary{T}"/> by delegating to the
+        /// German-specific overload with sensible defaults.
+        /// </remarks>
+        public class GermanDictionary : LanguageDictionaryBase<GermanWordEntry>
         {
+            /// <summary>
+            /// Initializes a new instance of <see cref="GermanDictionary"/>.
+            /// </summary>
+            /// <param name="storageService">
+            /// Optional persistence provider used to save and load dictionary entries.
+            /// If null, no external persistence is used and in-memory storage is relied upon.
+            /// </param>
+            public GermanDictionary(IDictionaryStorage<GermanWordEntry>? storageService = null) : base(storageService)
+            {
+            }
+
+            /// <summary>
+            /// Adds a word to the dictionary using language-default metadata.
+            /// </summary>
+            /// <param name="word">The word to add. Must not be null or empty.</param>
+            /// <remarks>
+            /// Implements <see cref="ILanguageDictionary{T}.AddWord(string)"/>.
+            /// By default this maps to the German overload using <see cref="Gender.Neuter"/> and
+            /// uses the provided word as its plural form.
+            /// </remarks>
+            public override void AddWord(string word) => AddWord(word, Gender.Neuter, word);
+
+            /// <summary>
+            /// Adds a German word with explicit grammatical gender and plural form.
+            /// </summary>
+            /// <param name="word">The base form of the German word to add.</param>
+            /// <param name="gender">The grammatical gender of the word (Masculine/Feminine/Neuter).</param>
+            /// <param name="plural">The plural form of the word.</param>
+            /// <remarks>
+            /// The method only adds the entry if the word is not already present
+            /// in the underlying case-insensitive storage.
+            /// </remarks>
+            public void AddWord(string word, Gender gender, string plural)
+            {
+                if (!_storage.ContainsKey(word))
+                    _storage.Add(word, new GermanWordEntry(word, gender, plural));
+            }
         }
-
-        // ILanguageDictionary<string> implementation: default AddWord maps to German overload
-        public override void AddWord(string word) => AddWord(word, Gender.Neuter, word);
-
-        // Overloaded method specific to German
-        public void AddWord(string word, Gender gender, string plural)
-        {
-            if (!_storage.ContainsKey(word))
-                _storage.Add(word, new GermanWordEntry(word, gender, plural));
-        }
-
-        // Other behaviors are inherited from LanguageDictionaryBase.
     }
-}
