@@ -20,17 +20,23 @@ namespace Soumyajit.System.DS.LanguageDictonaryApp
             englishDict.AddAntonym("Fast", "Slow");
             englishDict.AddSynonym("Fast", "Rapid");
 
-            string filePath = @"C:\soumyajit\data\dictionary\EN\myDictionary.json";
+            englishDict.AddWord("Good");
+            englishDict.AddSynonym("Good", "Quality");
+            englishDict.AddAntonym("Good", "Bad");
+            englishDict.AddAntonym("Good", "Ugly");
+            englishDict.AddSynonym("Good", "Moral");
+
+            //string filePath = @"C:\soumyajit\data\dictionary\EN\myDictionary.json";
             // 2. Save to disk
-            englishDict.Save(filePath);
+            englishDict.Save();
             Console.WriteLine("Dictionary Saved!");
 
             // 3. Load from disk
             var newDict = new EnglishDictionary(storage);
-            newDict.Load(filePath);
+            newDict.Load();
 
             try
-            {                  
+            {
                 var result = newDict.SearchWord("Fast");
                 Console.WriteLine($"Loaded word: {result.Word} has {result.Synonyms.Count} synonyms.");
             }
@@ -55,6 +61,34 @@ namespace Soumyajit.System.DS.LanguageDictonaryApp
             {
                 Console.WriteLine("No synonyms found for 'Fast'.");
             }
+
+            try
+            {
+                var result = newDict.SearchWord("Good");
+                Console.WriteLine($"Loaded word: {result.Word} has {result.Synonyms.Count} synonyms and has {result.Antonyms.Count} antonyms");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading word: {ex.Message}");
+            }
+
+            if (newDict.GetAntonym("Good", out var antonyms))
+            {
+                Console.WriteLine("Antonyms found:");
+
+                if (antonyms != null)
+                {
+                    foreach (var ant in antonyms)
+                    {
+                        Console.WriteLine($"- {ant}");
+                    }
+                }
+            }
+            else
+            {                 
+                Console.WriteLine("No antonyms found for 'Fast'."); 
+            }
         }
+            
     }
 }
